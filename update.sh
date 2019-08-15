@@ -4,11 +4,13 @@ set -xe
 # A POSIX variable
 OPTIND=1 # Reset in case getopts has been used previously in the shell.
 
-while getopts "r:v:d:" opt; do
+while getopts "r:v:t:d:" opt; do
     case "$opt" in
         r)  REPO=$OPTARG
         ;;
         v)  VERSION=$OPTARG
+        ;;
+        t)  TAG_VER=$OPTARG
         ;;
         d)  DOCKER_REPO=$OPTARG
         ;;
@@ -58,11 +60,15 @@ for to_arch in $to_archs; do
 FROM scratch
 COPY qemu-${to_arch}-static /usr/bin/
 EOF
-        docker build -t ${DOCKER_REPO}:$from_arch-$to_arch ${work_dir}
+        docker build -t ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${work_dir}
+        docker tag ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${DOCKER_REPO}:$from_arch-$to_arch
+        docker tag ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${DOCKER_REPO}:$to_arch-${TAG_VER}
         docker tag ${DOCKER_REPO}:$from_arch-$to_arch ${DOCKER_REPO}:$to_arch
         rm -rf "${work_dir}"
     fi
 done
 
-docker build -t ${DOCKER_REPO}:latest "${out_dir}/latest"
-docker build -t ${DOCKER_REPO}:register "${out_dir}/register"
+docker build -t ${DOCKER_REPO}:${TAG_VER} "${out_dir}/latest"
+docker tag ${DOCKER_REPO}:${TAG_VER} ${DOCKER_REPO}:latest
+docker build -t ${DOCKER_REPO}:register-${TAG_VER} "${out_dir}/register"
+docker tag ${DOCKER_REPO}:register-${TAG_VER} ${DOCKER_REPO}:register
