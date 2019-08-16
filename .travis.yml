@@ -16,12 +16,13 @@ env:
         - TAG_VER=v$VERSION
         # See qemu-user-static's RPM spec file on Fedora to check the new version.
         # https://src.fedoraproject.org/rpms/qemu/blob/master/f/qemu.spec
-        - DOCKER_SERVER=docker.io
-        # - DOCKER_SERVER=quay.io
+        # - DOCKER_SERVER=docker.io
+        - DOCKER_SERVER=quay.io
         # Git repository
         - REPO=multiarch/qemu-user-static
         # Container repository
-        - DOCKER_REPO=$DOCKER_SERVER/multiarch/qemu-user-static
+        # - DOCKER_REPO=$DOCKER_SERVER/multiarch/qemu-user-static
+        - DOCKER_REPO=$DOCKER_SERVER/junaruga/qemu-user-static
         # - DOCKER_REPO=$DOCKER_SERVER/your_username/qemu-user-static
         - PACKAGE_URI="https://kojipkgs.fedoraproject.org/packages/qemu/4.0.0/5.fc31/x86_64/qemu-user-static-4.0.0-5.fc31.x86_64.rpm"
         - PACKAGE_FILENAME=$(basename "$PACKAGE_URI")
@@ -39,7 +40,7 @@ script:
     - ./test.sh -d "$DOCKER_REPO"
 after_success:
     - |
-      if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then
+      # if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then
           docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" "$DOCKER_SERVER" && \
               docker push "$DOCKER_REPO"
-      fi
+      # fi
