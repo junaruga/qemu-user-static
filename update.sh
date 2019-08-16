@@ -61,14 +61,15 @@ FROM scratch
 COPY qemu-${to_arch}-static /usr/bin/
 EOF
         docker build -t ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${work_dir}
-        docker tag ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${DOCKER_REPO}:$from_arch-$to_arch
-        docker tag ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} ${DOCKER_REPO}:$to_arch-${TAG_VER}
-        docker tag ${DOCKER_REPO}:$from_arch-$to_arch ${DOCKER_REPO}:$to_arch
+        for target in  "${DOCKER_REPO}:$from_arch-$to_arch" \
+            "${DOCKER_REPO}:$to_arch-${TAG_VER}" \
+            "${DOCKER_REPO}:$to_arch" ; do
+            docker tag ${DOCKER_REPO}:$from_arch-$to_arch-${TAG_VER} "${target}"
+        done
         rm -rf "${work_dir}"
     fi
 done
 
 docker build -t ${DOCKER_REPO}:${TAG_VER} "${out_dir}/latest"
 docker tag ${DOCKER_REPO}:${TAG_VER} ${DOCKER_REPO}:latest
-docker build -t ${DOCKER_REPO}:register-${TAG_VER} "${out_dir}/register"
-docker tag ${DOCKER_REPO}:register-${TAG_VER} ${DOCKER_REPO}:register
+docker build -t ${DOCKER_REPO}:register "${out_dir}/register"
